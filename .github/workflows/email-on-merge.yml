@@ -9,7 +9,7 @@ on:
 jobs:
   send_email:
     if: github.event.pull_request.merged == true &&
-      contains(fromJson('["pm-dev","test", "uat", "preprod", "prod"]'), github.event.pull_request.base.ref)
+      contains(fromJson('["test", "mail"]'), github.event.pull_request.base.ref)
     runs-on: ubuntu-latest
 
     steps:
