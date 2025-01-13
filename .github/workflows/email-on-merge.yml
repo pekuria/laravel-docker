@@ -1,0 +1,32 @@
+# .github/workflows/notify-email-on-merge.yml
+name: Email Notification on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed # Triggers when a PR is closed
+
+jobs:
+  send_email:
+    if: github.event.pull_request.merged == true &&
+      contains(fromJson('["pm-dev","test", "uat", "preprod", "prod"]'), github.event.pull_request.base.ref)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Send Email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ vars.EMAIL_SERVER }}
+        server_port: ${{ vars.EMAIL_SERVER_PORT }}
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: PR Merged into '${{ github.event.pull_request.base.ref }}' Branch
+        body: |
+          A Pull Request (#${{ github.event.pull_request.number }}) has been merged into the '${{ github.event.pull_request.base.ref }}' branch.
+
+          Title: ${{ github.event.pull_request.title }}
+          Merged By: ${{ github.event.pull_request.merged_by.login }}
+          Link: ${{ github.event.pull_request.html_url }}
+        to: ${{ join(fromJson(vars.EMAIL_RECIPIENTS_LIST), ',') }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        
